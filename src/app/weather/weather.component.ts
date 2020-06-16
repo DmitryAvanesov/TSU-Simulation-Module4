@@ -12,10 +12,10 @@ export class WeatherComponent implements OnInit {
   state: number;
   daysPassed: number;
   hoursOfDayPassed: number;
-  testData: Array<number>;
-
   coefficients: Array<Array<number>>;
   hourDuration: number;
+  testState: number;
+  testData: Array<number>;
 
   stateChangedSource: Subject<number>;
   stateChanged: Observable<number>;
@@ -24,16 +24,15 @@ export class WeatherComponent implements OnInit {
 
   ngOnInit(): void {
     this.coefficients = new Array(new Array(-0.4, 0.3, 0.1), new Array(0.4, -0.8, 0.4), new Array(0.1, 0.4, -0.5));
-    this.hourDuration = 2500;
-
-    this.stateChangedSource = new Subject<number>();
-    this.stateChanged = this.stateChangedSource.asObservable();
-    this.stateChangedTestSource = new Subject<number>();
-    this.stateChangedTest = this.stateChangedTestSource.asObservable();
 
     // real-time
 
     this.state = this.getInitialState();
+    this.hourDuration = 2500;
+
+    this.stateChangedSource = new Subject<number>();
+    this.stateChanged = this.stateChangedSource.asObservable();
+
     this.setChangeStateTimeout();
 
     this.stateChanged.subscribe(newState => {
@@ -58,35 +57,54 @@ export class WeatherComponent implements OnInit {
 
     // testing
 
-    const N = 20000;
-    const T = 10000;
+    this.testState = this.getInitialState();
+    this.testData = new Array(this.coefficients.length).fill(0);
+    const coefN = 0;
+    const coefT = 10000;
+    let lastStateChange = 0;
+
+    this.stateChangedTestSource = new Subject<number>();
+    this.stateChangedTest = this.stateChangedTestSource.asObservable();
 
     this.setChangeStateTimeout(true);
 
-    let subscription = this.stateChangedTest.subscribe(() => {
+    let subscription = this.stateChangedTest.subscribe(newTestState => {
+      this.testState = newTestState;
       this.setChangeStateTimeout(true);
     });
 
     setTimeout(
       () => {
         subscription.unsubscribe();
+        lastStateChange = Date.now();
+        
         this.setChangeStateTimeout(true);
 
         subscription = this.stateChangedTest.subscribe(newState => {
-
+          this.testData[this.testState] += Date.now() - lastStateChange;
+          this.testState = newState;
+          lastStateChange = Date.now();
           this.setChangeStateTimeout(true);
+
+          console.log(
+            (this.testData[0] / this.testData.reduce((a, b) => a + b)).toFixed(2),
+            (this.testData[1] / this.testData.reduce((a, b) => a + b)).toFixed(2),
+            (this.testData[2] / this.testData.reduce((a, b) => a + b)).toFixed(2),
+            this.testData
+          );
         });
       },
-      N
+      coefN
     );
   }
+
 
   setChangeStateTimeout(test = false): void {
     setTimeout(
       () => {
-        this.changeState(this.state, test)
+        this.changeState(test)
       },
-      this.getTimeInterval(this.state, test)
+      this.getTimeInterval(test)
     );
   }
 
@@ -124,19 +142,24 @@ export class WeatherComponent implements OnInit {
     return 0;
   }
 
-  getTimeInterval(state: number, test = false): number {
+  getTimeInterval(test: boolean): number {
     if (test) {
-      return Math.log(Math.random()) / this.coefficients[state][state];
+      return Math.log(Math.random()) / this.coefficients[this.testState][this.testState];
     }
 
-    return Math.log(Math.random()) / this.coefficients[state][state] * this.hourDuration;
+    return Math.log(Math.random()) / this.coefficients[this.state][this.state] * this.hourDuration;
   }
 
-  changeState(state: number, test = false): void {
+  changeState(test: boolean): void {
     const distribution = new Array();
 
     for (const [index] of this.coefficients.entries()) {
-      distribution.push(index == state ? 0 : -this.coefficients[state][index] / this.coefficients[state][state]);
+      if (test) {
+        distribution.push(index == this.testState ? 0 : -this.coefficients[this.testState][index] / this.coefficients[this.testState][this.testState]);
+      }
+      else {
+        distribution.push(index == this.state ? 0 : -this.coefficients[this.state][index] / this.coefficients[this.state][this.state]);
+      }
     }
 
     const alpha = Math.random();
