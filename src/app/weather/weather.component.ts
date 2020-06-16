@@ -8,8 +8,9 @@ import { WeatherService } from '../weather.service';
 })
 export class WeatherComponent implements OnInit {
 
-  time: number;
   state: number;
+  daysPassed: number;
+  hoursOfDayPassed: number;
 
   constructor(private weather: WeatherService) {
   }
@@ -17,11 +18,27 @@ export class WeatherComponent implements OnInit {
   ngOnInit(): void {
     this.state = this.weather.getInitialState();
     this.setChangeStateTimeout();
-    
+
     this.weather.stateChanged.subscribe(newState => {
       this.state = newState;
       this.setChangeStateTimeout();
     });
+
+    this.daysPassed = 1;
+    this.hoursOfDayPassed = 0;
+
+    setInterval(
+      () => {
+        console.log(this.hoursOfDayPassed)
+        this.hoursOfDayPassed++;
+
+        if (this.hoursOfDayPassed == 24) {
+          this.daysPassed++;
+          this.hoursOfDayPassed = 0;
+        }
+      },
+      this.weather.hourDuration
+    );
   }
 
   setChangeStateTimeout(): void {

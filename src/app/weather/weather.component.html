@@ -2,4 +2,8 @@
   <img
     src="{{state == 0 ? '../../assets/sunny.svg' : state == 1 ? '../../assets/partly-cloudy.svg' : '../../assets/cloudy.svg'}}"
     ngClass="weather-image" />
+  <div ngClass="progress-bar">
+    <p ngClass="day-label">Day {{daysPassed}}</p>
+    <div ngClass="progress-bar-inner" [ngStyle]="{'width': hoursOfDayPassed / 24 * 100 + '%'}"></div>
+  </div>
 </div>

@@ -15,7 +15,7 @@ export class WeatherService {
 
   constructor() {
     this.coefficients = new Array(new Array(-0.4, 0.3, 0.1), new Array(0.4, -0.8, 0.4), new Array(0.1, 0.4, -0.5));
-    this.hourDuration = 1000;
+    this.hourDuration = 2500;
 
     this.stateChangedSource = new Subject<number>();
     this.stateChanged = this.stateChangedSource.asObservable();

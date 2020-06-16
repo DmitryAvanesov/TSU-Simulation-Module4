@@ -3,5 +3,28 @@ body {
 
   .weather-image {
     width: 200px;
+    margin-bottom: 50px;
+  }
+
+  .progress-bar {
+    width: 500px;
+    border: 1px white solid;
+
+    .day-label {
+      text-align: center;
+      color: white;
+      font-weight: bold;
+      font-size: 20px;
+      margin: 0;
+      line-height: 75px;
+      position: absolute;
+      left: 50%;
+      transform: translate(-50%, 0);
+    }
+
+    .progress-bar-inner {
+      height: 75px;
+      background-color: #512b8a;
+    }
   }
 }
