@@ -1,0 +1,12 @@
+* {
+  box-sizing: border-box;
+}
+
+.container {
+  padding: 10%;
+
+  & > * {
+    display: block;
+    margin: 0 auto;
+  }
+}

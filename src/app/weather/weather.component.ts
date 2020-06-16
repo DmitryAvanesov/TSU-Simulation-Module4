@@ -16,7 +16,21 @@ export class WeatherComponent implements OnInit {
 
   ngOnInit(): void {
     this.state = this.weather.getInitialState();
+    this.setChangeStateTimeout();
+    
+    this.weather.stateChanged.subscribe(newState => {
+      this.state = newState;
+      this.setChangeStateTimeout();
+    });
   }
 
+  setChangeStateTimeout(): void {
+    setTimeout(
+      () => {
+        this.weather.changeState(this.state)
+      },
+      this.weather.getTimeInterval(this.state)
+    );
+  }
 
 }
