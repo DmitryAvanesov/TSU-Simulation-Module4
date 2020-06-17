@@ -10,25 +10,31 @@ import { lusolve } from 'mathjs';
 export class WeatherComponent implements OnInit {
 
   state: number;
+  distribution: Array<Array<number>>;
   daysPassed: number;
   hoursOfDayPassed: number;
   coefficients: Array<Array<number>>;
   hourDuration: number;
-  testState: number;
-  testData: Array<number>;
+  timeStamp: number;
+  testTime: Array<number>;
+  totalTime: number;
+  testDistribution: Array<number>;
+  averageError: number;
+  varianceError: number;
+  stateNames: Array<string>;
 
   stateChangedSource: Subject<number>;
   stateChanged: Observable<number>;
-  stateChangedTestSource: Subject<number>;
-  stateChangedTest: Observable<number>;
 
   ngOnInit(): void {
     this.coefficients = new Array(new Array(-0.4, 0.3, 0.1), new Array(0.4, -0.8, 0.4), new Array(0.1, 0.4, -0.5));
-
-    // real-time
-
     this.state = this.getInitialState();
-    this.hourDuration = 2500;
+    this.hourDuration = 250;
+    this.timeStamp = Date.now();
+    this.testTime = new Array(this.coefficients.length).fill(0);
+    this.totalTime = 0;
+    this.testDistribution = new Array(this.coefficients.length);
+    this.stateNames = new Array('Sunny', 'Partly cloudy', 'Cloudy');
 
     this.stateChangedSource = new Subject<number>();
     this.stateChanged = this.stateChangedSource.asObservable();
@@ -36,7 +42,47 @@ export class WeatherComponent implements OnInit {
     this.setChangeStateTimeout();
 
     this.stateChanged.subscribe(newState => {
+      const timePassed = Date.now() - this.timeStamp;
+      this.totalTime += timePassed;
+      this.testTime[this.state] += timePassed;  
+      this.timeStamp = Date.now();
+
+      for (const [index, value] of this.testTime.entries()) {
+        this.testDistribution[index] = value / this.totalTime;
+      }
+
+      let averageReal = 0;
+
+      for (const [index, value] of this.distribution.entries()) {
+        averageReal += index * value[0];
+      }
+
+      let varianceReal = 0;
+
+      for (const [index, value] of this.distribution.entries()) {
+        varianceReal += Math.pow(index * averageReal, 2);
+      }
+
+      varianceReal /= this.distribution.length - 1;
+
+      let averageTest = 0;
+
+      for (const [index, value] of this.testDistribution.entries()) {
+        averageTest += index * value;
+      }
+
+      let varianceTest = 0;
+
+      for (const [index, value] of this.testDistribution.entries()) {
+        varianceTest += Math.pow(index * averageTest, 2);
+      }
+
+      varianceTest /= this.distribution.length - 1;
+
+      this.averageError = Math.abs(averageTest - averageReal) / Math.abs(averageReal);
+      this.varianceError = Math.abs(varianceTest - varianceReal) / Math.abs(varianceReal);
       this.state = newState;
+
       this.setChangeStateTimeout();
     });
 
@@ -54,57 +100,14 @@ export class WeatherComponent implements OnInit {
       },
       this.hourDuration
     );
-
-    // testing
-
-    this.testState = this.getInitialState();
-    this.testData = new Array(this.coefficients.length).fill(0);
-    const coefN = 0;
-    const coefT = 10000;
-    let lastStateChange = 0;
-
-    this.stateChangedTestSource = new Subject<number>();
-    this.stateChangedTest = this.stateChangedTestSource.asObservable();
-
-    this.setChangeStateTimeout(true);
-
-    let subscription = this.stateChangedTest.subscribe(newTestState => {
-      this.testState = newTestState;
-      this.setChangeStateTimeout(true);
-    });
-
-    setTimeout(
-      () => {
-        subscription.unsubscribe();
-        lastStateChange = Date.now();
-        
-        this.setChangeStateTimeout(true);
-
-        subscription = this.stateChangedTest.subscribe(newState => {
-          this.testData[this.testState] += Date.now() - lastStateChange;
-          this.testState = newState;
-          lastStateChange = Date.now();
-          this.setChangeStateTimeout(true);
-
-          console.log(
-            (this.testData[0] / this.testData.reduce((a, b) => a + b)).toFixed(2),
-            (this.testData[1] / this.testData.reduce((a, b) => a + b)).toFixed(2),
-            (this.testData[2] / this.testData.reduce((a, b) => a + b)).toFixed(2),
-            this.testData
-          );
-        });
-      },
-      coefN
-    );
   }
 
-
-  setChangeStateTimeout(test = false): void {
+  setChangeStateTimeout(): void {
     setTimeout(
       () => {
-        this.changeState(test)
+        this.changeState()
       },
-      this.getTimeInterval(test)
+      this.getTimeInterval()
     );
   }
 
@@ -126,12 +129,12 @@ export class WeatherComponent implements OnInit {
     parameters.push(new Array(this.coefficients.length).fill(1));
     terms.push(1);
 
-    const distribution = lusolve(parameters, terms);
+    this.distribution = lusolve(parameters, terms) as Array<Array<number>>;
 
     const alpha = Math.random();
     let curProbability = 0;
 
-    for (const [index, value] of (distribution as number[]).entries()) {
+    for (const [index, value] of (this.distribution as Array<Array<number>>).entries()) {
       curProbability += value[0];
 
       if (alpha < curProbability) {
@@ -142,24 +145,15 @@ export class WeatherComponent implements OnInit {
     return 0;
   }
 
-  getTimeInterval(test: boolean): number {
-    if (test) {
-      return Math.log(Math.random()) / this.coefficients[this.testState][this.testState];
-    }
-
+  getTimeInterval(): number {
     return Math.log(Math.random()) / this.coefficients[this.state][this.state] * this.hourDuration;
   }
 
-  changeState(test: boolean): void {
+  changeState(): void {
     const distribution = new Array();
 
     for (const [index] of this.coefficients.entries()) {
-      if (test) {
-        distribution.push(index == this.testState ? 0 : -this.coefficients[this.testState][index] / this.coefficients[this.testState][this.testState]);
-      }
-      else {
-        distribution.push(index == this.state ? 0 : -this.coefficients[this.state][index] / this.coefficients[this.state][this.state]);
-      }
+      distribution.push(index == this.state ? 0 : -this.coefficients[this.state][index] / this.coefficients[this.state][this.state]);
     }
 
     const alpha = Math.random();
@@ -169,13 +163,7 @@ export class WeatherComponent implements OnInit {
       curProbability += value;
 
       if (alpha < curProbability) {
-        if (test) {
-          this.stateChangedTestSource.next(index);
-        }
-        else {
-          this.stateChangedSource.next(index);
-        }
-
+        this.stateChangedSource.next(index);
         break;
       }
     }

@@ -1,9 +1,19 @@
 <div ngClass="container">
-  <img
-    src="{{state == 0 ? '../../assets/sunny.svg' : state == 1 ? '../../assets/partly-cloudy.svg' : '../../assets/cloudy.svg'}}"
-    ngClass="weather-image" />
+  <img ngClass="weather-image"
+    src="{{state == 0 ? '../../assets/sunny.svg' : state == 1 ? '../../assets/partly-cloudy.svg' : '../../assets/cloudy.svg'}}" />
   <div ngClass="progress-bar">
     <p ngClass="day-label">Day {{daysPassed}}</p>
     <div ngClass="progress-bar-inner" [ngStyle]="{'width': hoursOfDayPassed / 24 * 100 + '%'}"></div>
+  </div>
+  <div ngClass="test">
+    <p *ngFor="let probability of testDistribution; index as i">
+      <span ngClass="highlighted">{{stateNames[i]}}</span>: {{(probability * 100).toFixed(2)}}%
+    </p>
+    <div>
+      <span ngClass="highlighted">Average error:</span> {{(averageError * 100).toFixed(2)}}%
+    </div>
+    <div>
+      <span ngClass="highlighted">Variance error:</span> {{(varianceError * 100).toFixed(2)}}%
+    </div>
   </div>
 </div>
