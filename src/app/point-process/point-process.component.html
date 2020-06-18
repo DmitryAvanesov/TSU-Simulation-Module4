@@ -1,1 +1,6 @@
-<p>point-process works!</p>
+<div ngClass="container">
+  <div ngClass="amount" *ngFor="let amount of amounts; index as i">
+    <p ngClass="amount-name">{{names[i]}}</p>
+    <p [ngClass]="{'amount-number': true, 'amount-last': lastFlow == i}">{{amount}}</p>
+  </div>
+</div>

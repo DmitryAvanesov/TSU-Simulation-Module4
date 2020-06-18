@@ -1,4 +1,5 @@
 .container {
+  text-align: center;
   padding: 100px;
 
   & > * {
@@ -23,7 +24,12 @@
     cursor: pointer;
 
     &:hover {
-      color: #FF8856;
+      color: #ff8856;
+    }
+
+    &:focus {
+      outline: none;
+      box-shadow: none;
     }
   }
 }

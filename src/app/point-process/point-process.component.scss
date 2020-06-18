@@ -1,0 +1,18 @@
+.amount {
+  display: inline-block;
+  color: white;
+  margin: 50px 25px;
+
+  .amount-name {
+    font-size: 20px;
+  }
+
+  .amount-number {
+    font-size: 36px;
+    font-weight: bold;
+  }
+
+  .amount-last {
+    color: #ff8856;
+  }
+}
