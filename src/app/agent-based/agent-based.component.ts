@@ -25,18 +25,22 @@ export class AgentBasedComponent implements OnInit {
   queueIntensity: number;
 
   ngOnInit(): void {
-    this.numberOfStaff = 5;
+    this.numberOfStaff = 18;
     this.staff = new Array(this.numberOfStaff);
     this.queue = new Array();
-    this.queueIntensity = 0.0004;
+    this.queueIntensity = 0.001;
 
     for (const [index] of this.staff.entries()) {
       this.staff[index] = {
-        handleSpeed: Math.random(),
+        handleSpeed: Math.random() / 2 + 0.5,
         customer: undefined,
         timePassed: 0,
         getTime: function () {
           if (this.customer) {
+            if (this.customer.isScandalous) {
+              return (this.handleSpeed + this.customer.requestSize) * 50000 - this.timePassed;
+            }
+
             return (this.handleSpeed + this.customer.requestSize) * 10000 - this.timePassed;
           }
 
@@ -53,8 +57,8 @@ export class AgentBasedComponent implements OnInit {
     setTimeout(
       () => {
         this.queue.push({
-          requestSize: Math.random(),
-          isScandalous: Math.random() < 0.1
+          requestSize: Math.random() + 0.5,
+          isScandalous: Math.random() < 0.05
         });
 
         this.fillQueue();

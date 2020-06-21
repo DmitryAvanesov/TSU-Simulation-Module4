@@ -1,13 +1,25 @@
 <div ngClass="container">
   <div ngClass="staff-container">
     <div ngClass="staff" *ngFor="let employee of staff">
-      <p>{{employee.handleSpeed.toFixed(1)}}</p>
-      <p *ngIf="employee.customer">{{employee.customer.requestSize.toFixed(1)}}</p>
+      <div ngClass="icon-block">
+        <img ngClass="icon" src="../../assets/employee.svg" alt="employee">
+        <p>{{employee.handleSpeed.toFixed(1)}}</p>
+      </div>
+      <div ngClass="icon-block" *ngIf="employee.customer">
+        <img [ngClass]="{'icon': true, 'icon-scandalous': employee.customer.isScandalous}"
+          src="../../assets/customer.svg" alt="customer">
+        <p>{{employee.customer.requestSize.toFixed(1)}}</p>
+      </div>
+      <div ngClass="icon-block" *ngIf="!employee.customer">
+        <div ngClass="icon"></div>
+        <p>-</p>
+      </div>
     </div>
   </div>
   <div ngClass="queue-container">
-    <div ngClass="queue" *ngFor="let customer of queue">
-      {{customer.requestSize.toFixed(1)}}
+    <div ngClass="icon-block" *ngFor="let customer of queue; index as i">
+      <img [ngClass]="{'icon': true, 'icon-scandalous': customer.isScandalous}" src="../../assets/customer.svg"
+        alt="customer" [ngStyle]="{left: i * 25 + 'px'}">
     </div>
   </div>
 </div>
