@@ -31,7 +31,7 @@ export class PointProcessComponent implements OnInit {
   ngOnInit(): void {
     this.intensityFirst = 0.0007;
     this.intensitySecond = 0.0013;
-    this.statsInterval = 1000;
+    this.statsInterval = 1500;
     this.statsData = new Array(10).fill(0);
     this.statsAmount = 0;
     this.intervalAmount = 0;
