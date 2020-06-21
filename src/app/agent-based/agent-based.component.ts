@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { factorial } from 'mathjs';
 
 interface IContext {
   staffIntensity: number
@@ -28,13 +29,15 @@ export class AgentBasedComponent implements OnInit {
   queue: Array<IAgentCustomer>;
   queueIntensity: number;
   staffIntensity: number;
+  distribution: Array<number>;
 
   ngOnInit(): void {
     this.numberOfStaff = 20;
     this.staff = new Array(this.numberOfStaff);
     this.queue = new Array();
-    this.queueIntensity = 0.00075;
-    this.staffIntensity = 0.00005;
+    this.queueIntensity = 0.00095;
+    this.staffIntensity = 0.0001;
+    this.distribution = new Array(50);
 
     for (const [index] of this.staff.entries()) {
       this.staff[index] = {
@@ -54,6 +57,23 @@ export class AgentBasedComponent implements OnInit {
         }
       };
     }
+
+    const intensityRatio = this.queueIntensity / (this.staffIntensity * 0.5);
+    let probabilityBase = 0;
+
+    for (let i = 0; i <= this.numberOfStaff; i++) {
+      probabilityBase += Math.pow(intensityRatio, i) / factorial(i);
+    }
+
+    probabilityBase = Math.pow(probabilityBase + Math.pow(intensityRatio, this.numberOfStaff + 1) / (factorial(this.numberOfStaff) * (this.numberOfStaff - intensityRatio)), -1);
+
+    for (const [index] of this.distribution.entries()) {
+      this.distribution[index] = index < this.numberOfStaff
+        ? Math.pow(intensityRatio, index) * probabilityBase / factorial(index)
+        : Math.pow(intensityRatio, index) * probabilityBase / (factorial(this.numberOfStaff) * Math.pow(this.numberOfStaff, index - this.numberOfStaff));
+    }
+
+    console.log(this.distribution)
 
     this.fillQueue();
     this.getNextEvent();
