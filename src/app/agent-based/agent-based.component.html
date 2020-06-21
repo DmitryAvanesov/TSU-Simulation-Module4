@@ -1,3 +1,13 @@
 <div ngClass="container">
-
+  <div ngClass="staff-container">
+    <div ngClass="staff" *ngFor="let employee of staff">
+      <p>{{employee.handleSpeed.toFixed(1)}}</p>
+      <p *ngIf="employee.customer">{{employee.customer.requestSize.toFixed(1)}}</p>
+    </div>
+  </div>
+  <div ngClass="queue-container">
+    <div ngClass="queue" *ngFor="let customer of queue">
+      {{customer.requestSize.toFixed(1)}}
+    </div>
+  </div>
 </div>
