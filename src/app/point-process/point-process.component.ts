@@ -76,7 +76,7 @@ export class PointProcessComponent implements OnInit {
         this.statsData[Math.min(this.intervalAmount, 9)]++;
         this.statsAmount++;
         this.intervalAmount = 0;
-        
+
         this.statsDataTotal[Math.min(this.intervalAmountTotal, 9)]++;
         this.statsAmountTotal++;
         this.intervalAmountTotal = 0;
