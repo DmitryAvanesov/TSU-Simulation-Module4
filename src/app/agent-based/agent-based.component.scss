@@ -1,3 +1,7 @@
+* {
+  color: white;
+}
+
 .staff-container {
   padding: 50px;
   margin-bottom: 50px;
@@ -20,7 +24,6 @@
   display: inline-block;
   vertical-align: top;
   margin: 0 5px;
-  color: white;
 
   .icon {
     width: 50px;
@@ -33,4 +36,10 @@
   .icon-scandalous {
     border-color: red;
   }
+}
+
+.test-container {
+  position: absolute;
+  right: 50px;
+  bottom: 50px;
 }

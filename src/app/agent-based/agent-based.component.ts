@@ -25,19 +25,35 @@ interface IAgentEmployee {
 export class AgentBasedComponent implements OnInit {
 
   numberOfStaff: number;
+  numberOfActiveStaff: number;
   staff: Array<IAgentEmployee>;
   queue: Array<IAgentCustomer>;
   queueIntensity: number;
   staffIntensity: number;
+  distributionSize: number;
   distribution: Array<number>;
+  testInterval: number;
+  testAmount: number;
+  testDistribution: Array<number>;
+  average: number;
+  variance: number;
+  averageError: number;
+  varianceError: number;
 
   ngOnInit(): void {
     this.numberOfStaff = 20;
+    this.numberOfActiveStaff = 0;
     this.staff = new Array(this.numberOfStaff);
     this.queue = new Array();
-    this.queueIntensity = 0.00095;
-    this.staffIntensity = 0.0001;
-    this.distribution = new Array(50);
+    this.queueIntensity = 0.0007;
+    this.staffIntensity = 0.000075;
+    this.distributionSize = 50;
+    this.distribution = new Array(this.distributionSize);
+    this.testInterval = 100;
+    this.testAmount = 0;
+    this.testDistribution = new Array(this.distributionSize).fill(0);
+    this.average = 0;
+    this.variance = 0;
 
     for (const [index] of this.staff.entries()) {
       this.staff[index] = {
@@ -58,7 +74,7 @@ export class AgentBasedComponent implements OnInit {
       };
     }
 
-    const intensityRatio = this.queueIntensity / (this.staffIntensity * 0.5);
+    const intensityRatio = this.queueIntensity / (this.staffIntensity / 2.1);
     let probabilityBase = 0;
 
     for (let i = 0; i <= this.numberOfStaff; i++) {
@@ -73,10 +89,45 @@ export class AgentBasedComponent implements OnInit {
         : Math.pow(intensityRatio, index) * probabilityBase / (factorial(this.numberOfStaff) * Math.pow(this.numberOfStaff, index - this.numberOfStaff));
     }
 
-    console.log(this.distribution)
+    this.distribution[this.distributionSize - 1] += 1 - this.distribution.reduce((a, b) => a + b);
+
+    for (const [index, value] of this.distribution.entries()) {
+      this.average += index * value;
+    }
+
+    for (const [index] of this.distribution.entries()) {
+      this.variance += Math.pow(index * this.average, 2);
+    }
+
+    this.variance /= this.distributionSize - 1;
 
     this.fillQueue();
     this.getNextEvent();
+
+    setInterval(
+      () => {
+        this.testDistribution[Math.min(this.distributionSize - 1, this.numberOfActiveStaff + this.queue.length)]++;
+        this.testAmount++;
+
+        let testAverage = 0;
+
+        for (const [index, value] of this.testDistribution.entries()) {
+          testAverage += index * (value / this.testAmount);
+        }
+
+        let testVariance = 0;
+
+        for (const [index] of this.testDistribution.entries()) {
+          testVariance += Math.pow(index * testAverage, 2);
+        }
+
+        testVariance /= this.distributionSize - 1;
+
+        this.averageError = Math.abs(testAverage - this.average) / Math.abs(this.average);
+        this.varianceError = Math.abs(testVariance - this.variance) / Math.abs(this.variance);
+      },
+      this.testInterval
+    );
   }
 
   fillQueue() {
@@ -93,7 +144,7 @@ export class AgentBasedComponent implements OnInit {
     );
   }
 
-  getNextEvent(curAgent: number = undefined) {
+  getNextEvent() {
     let minTime = 10e10;
     let nextAgent = 0;
 
@@ -115,15 +166,23 @@ export class AgentBasedComponent implements OnInit {
     setTimeout(
       () => {
         if (this.queue.length > 0) {
+          if (!this.staff[nextAgent].customer) {
+            this.numberOfActiveStaff++;
+          }
+
           this.staff[nextAgent].timePassed = 0;
           this.staff[nextAgent].customer = this.queue[0];
           this.queue.shift();
         }
         else {
+          if (this.staff[nextAgent].customer) {
+            this.numberOfActiveStaff--;
+          }
+
           this.staff[nextAgent].customer = undefined;
         }
 
-        this.getNextEvent(nextAgent);
+        this.getNextEvent();
       },
       minTime
     );

@@ -22,4 +22,8 @@
         alt="customer" [ngStyle]="{left: i * 25 + 'px'}">
     </div>
   </div>
+  <div ngClass="test-container">
+    <p>Average error: {{(averageError * 100).toFixed(2)}}%</p>
+    <p>Variance error: {{(varianceError * 100).toFixed(2)}}%</p>
+  </div>
 </div>
