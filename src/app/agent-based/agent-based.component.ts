@@ -27,6 +27,7 @@ export class AgentBasedComponent implements OnInit {
   numberOfStaff: number;
   numberOfActiveStaff: number;
   staff: Array<IAgentEmployee>;
+  averageHandleSpeed: number;
   queue: Array<IAgentCustomer>;
   queueIntensity: number;
   staffIntensity: number;
@@ -44,12 +45,13 @@ export class AgentBasedComponent implements OnInit {
     this.numberOfStaff = 20;
     this.numberOfActiveStaff = 0;
     this.staff = new Array(this.numberOfStaff);
+    this.averageHandleSpeed = 0;
     this.queue = new Array();
     this.queueIntensity = 0.0007;
     this.staffIntensity = 0.000075;
     this.distributionSize = 50;
     this.distribution = new Array(this.distributionSize);
-    this.testInterval = 100;
+    this.testInterval = 1000;
     this.testAmount = 0;
     this.testDistribution = new Array(this.distributionSize).fill(0);
     this.average = 0;
@@ -72,9 +74,13 @@ export class AgentBasedComponent implements OnInit {
           return 0;
         }
       };
+
+      this.averageHandleSpeed += this.staff[index].handleSpeed;
     }
 
-    const intensityRatio = this.queueIntensity / (this.staffIntensity / 2.1);
+    this.averageHandleSpeed /= this.numberOfStaff;
+
+    const intensityRatio = this.queueIntensity / (this.staffIntensity / ((this.averageHandleSpeed + 1) * 1.2));
     let probabilityBase = 0;
 
     for (let i = 0; i <= this.numberOfStaff; i++) {
