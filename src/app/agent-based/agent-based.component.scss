@@ -1,0 +1,45 @@
+* {
+  color: white;
+}
+
+.staff-container {
+  padding: 50px;
+  margin-bottom: 50px;
+
+  .staff {
+    display: inline-block;
+    margin: 0 25px 10px;
+  }
+}
+
+.queue-container {
+  position: relative;
+
+  .icon {
+    position: absolute;
+  }
+}
+
+.icon-block {
+  display: inline-block;
+  vertical-align: top;
+  margin: 0 5px;
+
+  .icon {
+    width: 50px;
+    height: 50px;
+    background-color: white;
+    border: solid white;
+    border-radius: 50%;
+  }
+
+  .icon-scandalous {
+    border-color: red;
+  }
+}
+
+.test-container {
+  position: absolute;
+  right: 50px;
+  bottom: 50px;
+}

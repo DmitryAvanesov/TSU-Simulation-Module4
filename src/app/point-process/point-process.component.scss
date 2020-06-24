@@ -1,0 +1,46 @@
+.amount-container {
+  padding: 50px;
+  margin-bottom: 50px;
+
+  .amount-block {
+    display: inline-block;
+    color: white;
+    margin: 0 25px;
+  
+    .amount-name {
+      font-size: 20px;
+    }
+  
+    .amount-number {
+      font-size: 40px;
+      font-weight: bold;
+    }
+  
+    .amount-last {
+      color: #ff8856;
+    }
+  }
+}
+
+.stats-container {
+  .stats-block {
+    display: inline-block;
+    vertical-align: middle;
+    margin: 0 50px;
+    color: white;
+
+    .stat-title {
+      font-weight: bold;
+      font-size: 20px;
+    }
+
+    .stat-vs {
+      font-weight: bold;
+      font-size: 40px;
+    }
+
+    .stat {
+      font-size: 18px;
+    }
+  }
+}
